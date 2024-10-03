@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const config = require('../config/jwt');
 
-exports.aluno = async (req, res) => {
+exports.user = async (req, res) => {
   try {
-    const { email , nome, senha } = req.body;
-    const aluno = new aluno({ nome, senha , email });
-    await aluno.save();
+    const { email , senha } = req.body;
+    const aluno = new aluno({ email , senha });
+    await userModel.save();
     res.status(201).json({ message: 'Usuário registrado com sucesso' });
   } catch (error) {
     res.status(400).json({ error: error.message });

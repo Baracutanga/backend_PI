@@ -1,9 +1,15 @@
 // Exportando o jsonwebtoken, as configurações de documentação e o 'User'.
-//Cont: tudo isso para fazer a config de autenticação e webtoken do usuário ao cadastrar.
+/* Essa função middleware é usada para verificar  
+o token antes de ter acesso ao usuário para proteger 
+os seus endpoints. Se o token for inválido
+ele será restringir o usuário de forma que 
+accessando os endpoints protegidos  
+conseguimos usar esse middleware para qualquer um dos endpoints   
+feitos do sistema*/
 const jwt = require('jsonwebtoken');
 const config = require('../config/jwt');
 const User = require('../models/userModel');
-//Exportando o modelo de usuário que contem as informações de cadastro:email,nome,senha.
+//Exportando o modelo de usuário que contem as informações de cadastro:email,senha.
 //Criando constante autenticaHeader que vai guardar uma requisição do header('Authorization)
 //Condição if (!autenticaHeader) para verificar se o usuário tem autorização de entrar no sistema, se não ele retorna mensagem (401) de erro
 module.exports = async (req, res, next) => {
@@ -19,7 +25,7 @@ module.exports = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, config.secret);
+    const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
     req.user = await User.findById(decoded.id);
     if (!req.user) {
       return res.status(401).json({ message: 'Usuário não encontrado, autorização negada' });
