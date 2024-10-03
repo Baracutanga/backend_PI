@@ -8,4 +8,10 @@ router.post("/create", avisoController.createAviso);
 // Listar todos os avisos
 router.get("/", avisoController.getAllAvisos);
 
+//Atualizar status aviso
+router.update("/update", avisoController.updateAvisos);
+
+//Deleta o aviso
+router.delete("/delete", avisoController.deleteAvisos);
+
 module.exports = router;
