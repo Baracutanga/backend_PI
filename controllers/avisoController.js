@@ -183,4 +183,16 @@ const getAllAvisos = async (req, res) => {
 //   }
 // };
 
+   exports.updateAvisos = async (req,res) => {
+     const avisosUp = await aluno.findByIdAndUpdate(req.params.id, req.body, { new: true });
+     if (!aviso) {
+        return res.status(404).json({ message: 'Aviso não enviado' });
+      }
+      res.json(aviso);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+
 
