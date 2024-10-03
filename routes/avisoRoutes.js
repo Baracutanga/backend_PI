@@ -12,6 +12,6 @@ router.get("/", avisoController.getAllAvisos);
 router.update("/update", avisoController.updateAvisos);
 
 //Deleta o aviso
-router.delete("/delete", avisoController.deleteAvisos);
+router.delete("/delete", avisoController.deleteAviso);
 
 module.exports = router;
