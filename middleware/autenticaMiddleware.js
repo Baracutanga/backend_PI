@@ -1,6 +1,6 @@
 // Exportando o jsonwebtoken, as configurações de documentação e o 'User'.
 //Cont: tudo isso para fazer a config de autenticação e webtoken do usuário ao cadastrar.
-const jwt = require('jsonwebtoken');
+/*const jwt = require('jsonwebtoken');
 const config = require('../config/jwt');
 const User = require('../models/userModel');
 //Exportando o modelo de usuário que contem as informações de cadastro:email,nome,senha.
@@ -29,3 +29,4 @@ module.exports = async (req, res, next) => {
     res.status(401).json({ message: 'Token não valido' });
   }
 };
+*/

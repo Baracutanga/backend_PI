@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+/*const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const config = require('../config/jwt');
 
@@ -26,3 +26,4 @@ exports.user = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+*/
