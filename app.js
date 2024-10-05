@@ -1,5 +1,4 @@
 const express = require('express');
-const router = express.Router();
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require("body-parser");
@@ -7,7 +6,6 @@ const helmet = require('helmet');
 const dotenv = require('dotenv');
 const mongoose = require("mongoose"); 
 
-const userRoutes = require('./routes/userRoutes');
 const professorRoutes = require('./routes/professorRoutes');
 const coordenadorRoutes = require('./routes/coordenadorRoutes');
 const alunoRoutes = require('./routes/alunoRoutes');
@@ -21,7 +19,7 @@ dotenv.config();
 
 
 
-mongoose.connect(process.env.DATABASE)
+mongoose.connect(DB)
 .then(() => console.log("Conectado ao Banco de Dados"))
 .catch(err => console.log("Erro ao Conectar ao Banco de dados", err));
 
@@ -46,8 +44,6 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 // Rotas
-// app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
 app.use("/api/turmas", turmaRoutes);
 app.use('/api/professor', professorRoutes);
 app.use('/api/aluno', alunoRoutes);
