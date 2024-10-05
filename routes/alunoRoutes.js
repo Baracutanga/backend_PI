@@ -1,14 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const alunoController = require("../controllers/alunoController");
+//Importando middleware pare verificacao de token de usuario
+const autenticaMiddlewareAluno = require('../middleware/autenticaMiddlewareAluno');
 
 // Criar um novo aluno
-router.post("/create", alunoController.createAluno);
+router.post("/create",autenticaMiddlewareAluno, alunoController.createAluno);
 
 // Listar todos os alunos
-router.get("/", alunoController.getAllAlunos);
+router.get("/", autenticaMiddlewareAluno, alunoController.getAllAlunos);
 
 // Deletar aluno por ID
-router.delete("/delete/:alunoId", alunoController.deleteAluno);
+router.delete("/delete/:alunoId", autenticaMiddlewareAluno, alunoController.deleteAluno);
 
 module.exports = router;
