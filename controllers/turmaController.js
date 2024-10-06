@@ -1,27 +1,22 @@
 const Turma = require("../models/turmaModel");
 const Disciplina = require("../models/disciplinaModel");
-const mongoose = require('mongoose');
-
-///////////////////////////////////////////////////////////
+const User = require("../models/userModel");
 
 exports.createTurma = async (req, res) => {
   try {
     const { nome, disciplinas, turno } = req.body;
 
-    // checar se as disciplinas sao por id ou nome
     const disciplinasExistentes = await Disciplina.find({
       $or: [
-        { _id: { $in: disciplinas } }, // Buscar por ID
-        { nome: { $in: disciplinas } }  // Buscar por nome
+        { _id: { $in: disciplinas } },
+        { nome: { $in: disciplinas } }
       ]
     });
 
-    
     if (disciplinasExistentes.length !== disciplinas.length) {
       return res.status(404).json({ message: 'Uma ou mais disciplinas não foram encontradas.' });
     }
 
-    
     const novaTurma = new Turma({
       nome,
       disciplinas: disciplinasExistentes.map(disciplina => disciplina._id),
@@ -32,7 +27,16 @@ exports.createTurma = async (req, res) => {
 
     await Disciplina.updateMany(
       { _id: { $in: disciplinasExistentes.map(d => d._id) } },
-      { $addToSet: { turmas: novaTurma._id } } // Adicionar o ID da turma ao array turmas
+      { $addToSet: { turmas: novaTurma._id } }
+    );
+
+    const professoresAssociados = await User.find({
+      _id: { $in: disciplinasExistentes.map(disciplina => disciplina.professor) }
+    });
+
+    await User.updateMany(
+      { _id: { $in: professoresAssociados.map(professor => professor._id) } },
+      { $addToSet: { turmas: novaTurma._id } }
     );
 
     res.status(201).json({ message: 'Turma criada com sucesso!', turma: novaTurma });
@@ -42,129 +46,60 @@ exports.createTurma = async (req, res) => {
   }
 };
 
-//CRIAR TURMA.. ENTRADA DE DADOS DA DISCIPLINA(NOME OU ID)
-// exports.createTurma = async (req, res) => {
-//     const { nome, disciplinas, turno } = req.body;
+exports.getAllTurmas = async (req, res) => {
+  try {
+    const turmas = await Turma.find()
+      .populate({
+        path: 'disciplinas',
+        select: '-turmas',
+        populate: { path: 'professor', select: 'nome' }
+      })
+      .populate({
+        path: 'alunos',
+        select: 'nome email'
+      });
 
-//     try {
-        
-//         const turmaExistente = await Turma.findOne({ nome });
+    res.status(200).json(turmas);
+  } catch (err) {
+    console.error('Erro ao buscar turmas:', err);
+    res.status(500).json({ message: 'Erro ao buscar turmas', err });
+  }
+};
 
-//         if (turmaExistente) {
-//             return res.status(400).json({ message: "Turma já existe." });
-//         }
+exports.deleteTurma = async (req, res) => {
+  try {
+    const { turma } = req.params;
 
-//         // Array para armazenar os IDs das disciplinas
-//         let disciplinaIds = [];
+    let turmaEncontrada = await Turma.findById(turma).populate('disciplinas');
 
-//         // Processa cada disciplina no array de disciplinas
-//         for (let disciplina of disciplinas) {
-//             let disciplinaId;
+    if (!turmaEncontrada) {
+      turmaEncontrada = await Turma.findOne({ nome: turma }).populate('disciplinas');
+    }
 
-            
-//             if (mongoose.Types.ObjectId.isValid(disciplina)) {
-//                 disciplinaId = disciplina;
-//             } else {
-               
-//                 const disciplinaQuery = await Disciplina.findOne({ nome: disciplina });
+    if (!turmaEncontrada) {
+      return res.status(404).json({ message: 'Turma não encontrada.' });
+    }
 
-                
-//                 if (!disciplinaQuery) {
-//                     return res.status(404).json({
-//                         status: "fail",
-//                         message: `Disciplina não encontrada: ${disciplina}`
-//                     });
-//                 }
+    await Disciplina.updateMany(
+      { _id: { $in: turmaEncontrada.disciplinas } },
+      { $pull: { turmas: turmaEncontrada._id } }
+    );
 
-                
-//                 disciplinaId = disciplinaQuery._id;
-//             }
+    await User.findByIdAndUpdate(
+      turmaEncontrada.professor,
+      { $pull: { turmas: turmaEncontrada._id } }
+    );
 
-            
-//             disciplinaIds.push(disciplinaId);
-//         }
+    await User.updateMany(
+      { _id: { $in: turmaEncontrada.alunos } },
+      { $pull: { turmas: turmaEncontrada._id } }
+    );
 
-        
-//         const novaTurma = new Turma({
-//             nome,
-//             disciplinas: disciplinaIds, 
-//             turno
-//         });
+    await Turma.findByIdAndDelete(turmaEncontrada._id);
 
-        
-//         const turmaSalva = await novaTurma.save();
-
-        
-//         res.status(201).json({
-//             status: "success",
-//             message: "Turma criada com sucesso!",
-//             data: { turma: turmaSalva }
-//         });
-
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({
-//             status: "Internal Server Error",
-//             message: "Erro ao cadastrar Turma. Tente novamente.",
-//             error: err.message
-//         });
-//     }
-// };
-
-// ///////////////////////////////////////////////////////////
-
-// exports.getAllTurmas = async (req, res) => {
-//     try {
-//         const turmas = await Turma.find().populate("disciplinas");
-//         res.status(200).json({
-//             status: "success",
-//             data: {
-//                 turmas
-//             }
-//         });
-//     } catch (err) {
-//         res.status(400).json({ 
-//             status: "fail",
-//             message: err.message 
-//         });
-//     }
-// };
-
-// ///////////////////////////////////////////////////////////
-
-// exports.deleteTurma = async (req, res) => {
-//     const { id } = req.params;
-//     const { nome } = req.body;
-
-//     try {
-//         if(id) {
-//             const turmaDeletada = await Turma.findByIdAndDelete(id);
-            
-//             if (!turmaDeletada) {
-//                 return res.status(404).json({ message: "Turma não encontrada pelo ID." });
-//             }
-
-//             return res.status(200).json({status: "sucess", message: "Turma deletada com sucesso"})
-
-//         } else if (nome) {
-//             const turmaDeletada = await Turma.findOneAndDelete({ nome });
-
-//             if (!turmaDeletada) {
-//                 return res.status(404).json({status: "sucess", message: "Turma não encontrada pelo nome." });
-//             }
-
-//             return res.status(200).json({ message: "Turma deletada com sucesso"})
-
-            
-//         } else {
-//             return res.status(400).json({ message: "Por favor, forneça um ID ou um nome para deletar." });
-//         }
-        
-        
-//     } catch (err) {
-//         res.status(400).json({ 
-//             status: "fail",
-//             message: err.message 
-//         });
-//     }
-// };
+    res.status(200).json({ message: 'Turma deletada com sucesso.' });
+  } catch (err) {
+    console.error('Erro ao deletar turma:', err);
+    res.status(500).json({ message: 'Erro ao deletar turma', err });
+  }
+};

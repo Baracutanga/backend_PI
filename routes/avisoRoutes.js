@@ -1,17 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const avisoController = require("../controllers/avisoController");
+const avisoController = require("../controllers/avisoController"); 
 
-// Criar um novo aviso
-router.post("/create", avisoController.createAviso);
 
-// Listar todos os avisos
-router.get("/", avisoController.getAllAvisos);
+// Criar aviso de Professor
+router.post("/aviso", avisoController.createAviso);
 
-//Atualizar status aviso
-router.update("/update", avisoController.updateAvisos);
+// Criar aviso de Coordenador (para todas as turmas)
+router.post("/aviso/coordenador", avisoController.createAvisoCoordenador);
 
-//Deleta o aviso
-router.delete("/delete", avisoController.deleteAvisos);
+// Atualizar aviso
+router.put("/aviso/:id", avisoController.updateAviso);
+
+// Obter todos os avisos do autor logado
+router.get("/aviso", avisoController.getAllAvisos);
 
 module.exports = router;
