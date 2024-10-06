@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const coordenador = require('../controllers/coordenadorController');
+const coordenadorController = require('../controllers/coordenadorController'); // Ajuste o caminho conforme necessário
 
-router.get('/', coordenador.getCoordenadores);
-router.get('/', coordenador.getCoordenadoresById);
-router.post('/', coordenador.createCoordenador);
-router.put('/:id', coordenador.updateCoordenador);
-router.delete('/:id', coordenador.deleteCoordenador);
+// Rota para criar um coordenador
+router.post('/create', coordenadorController.createCoordenador);
+
+// Rota para deletar um coordenador
+router.delete('/delete', coordenadorController.deleteCoordenador);
 
 module.exports = router;

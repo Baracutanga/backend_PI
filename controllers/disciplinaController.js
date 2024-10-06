@@ -1,146 +1,98 @@
-const User = require('../models/userModel'); 
-const Disciplina = require('../models/disciplinaModel'); 
+const mongoose = require("mongoose");
+const User = require('../models/userModel');
+const Disciplina = require('../models/disciplinaModel');
 
-
-exports.criarDisciplina = async (req, res) => {
+exports.createDisciplina = async (req, res) => {
   try {
-    const { nome, professorId } = req.body;
+    const { nome, professor } = req.body;
 
-    // Verificar se o professor existe
-    const professor = await User.findById(professorId);
-    if (!professor || professor.user !== 'Professor') {
+    let professorQuery;
+
+    if (mongoose.Types.ObjectId.isValid(professor)) {
+      professorQuery = await User.findById(professor);
+    } else {
+      professorQuery = await User.findOne({ nome: professor, user: 'Professor' });
+    }
+
+    if (!professorQuery || professorQuery.user !== 'Professor') {
       return res.status(404).json({ message: 'Professor não encontrado' });
     }
 
     const novaDisciplina = new Disciplina({
       nome,
-      professor: professorId 
+      professor: professorQuery._id 
     });
 
-    
     await novaDisciplina.save();
 
-    professor.disciplinas.push(novaDisciplina._id);
-    await professor.save();
+    professorQuery.disciplinas.push(novaDisciplina._id);
+    await professorQuery.save();
 
     res.status(201).json({ message: 'Disciplina criada e professor atualizado com sucesso!', disciplina: novaDisciplina });
   } catch (error) {
     console.error('Erro ao criar disciplina:', error);
-    res.status(500).json({ message: 'Erro ao criar disciplina', error });
+    res.status(500).json({ message: 'Erro ao criar disciplina', error: error.message || 'Erro desconhecido' });
   }
 };
 
 exports.getAllDisciplinas = async (req, res) => {
-    try {
-      const disciplinas = await Disciplina.find().populate('professor', 'nome email');
-       
-      res.status(200).json({
-        message: 'Disciplinas encontradas com sucesso!',
-        disciplinas,
-      });
-    } catch (error) {
-      console.error('Erro ao buscar disciplinas:', error);
-      res.status(500).json({ message: 'Erro ao buscar disciplinas', error });
+  try {
+    const disciplinas = await Disciplina.find().populate('professor', 'nome');
+    res.status(200).json(disciplinas);
+  } catch (error) {
+    console.error('Erro ao buscar disciplinas:', error);
+    res.status(500).json({ message: 'Erro ao buscar disciplinas', error: error.message || 'Erro desconhecido' });
+  }
+};
+
+exports.deleteDisciplina = async (req, res) => {
+  try {
+    const { disciplina } = req.body;
+
+    let disciplinaQuery;
+
+    if (mongoose.Types.ObjectId.isValid(disciplina)) {
+      disciplinaQuery = await Disciplina.findById(disciplina);
+    } else {
+      disciplinaQuery = await Disciplina.findOne({ nome: disciplina });
     }
-  };
-  
- 
 
+    if (!disciplinaQuery) {
+      return res.status(404).json({ message: 'Disciplina não encontrada' });
+    }
 
+    await Disciplina.findByIdAndDelete(disciplinaQuery._id);
 
+    const professorQuery = await User.findById(disciplinaQuery.professor);
 
+    if (professorQuery) {
+      professorQuery.disciplinas = professorQuery.disciplinas.filter(d => {
+        return d.DisciplinaId && !d.DisciplinaId.equals(disciplinaQuery._id);
+      });
+      await professorQuery.save();
+    }
 
+    const turmas = disciplinaQuery.turmas;
+    if (turmas.length > 0) {
+      await Turma.updateMany(
+        { _id: { $in: turmas } },
+        { $pull: { disciplinas: disciplinaQuery._id } }
+      );
+    }
 
-// const Disciplina = require('../models/disciplinaModel');
+    res.status(200).json({ message: 'Disciplina deletada e professor/turmas atualizados com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao deletar disciplina:', error);
+    res.status(500).json({ message: 'Erro ao deletar disciplina', error: error.message || 'Erro desconhecido' });
+  }
+};
 
-// ///////////////////////////////////////////////////////////
-
-// exports.getAllDisciplinas = async (req, res) => { 
-//     try {
-        
-//         const allDisciplinas = await Disciplina.find();
-
-//         // Retornando a resposta ao cliente
-//         res.status(200).json({
-//             status: "success",
-//             results: allDisciplinas.length, // Contagem das disciplinas encontradas
-//             data: {
-//                 disciplinas: allDisciplinas // Alterado para 'disciplinas' para maior clareza
-//             }
-//         });
-//     } catch (err) {
-//         // Retornando erro se algo der errado
-//         res.status(500).json({
-//             status: "fail",
-//             message: err.message // Exibe a mensagem de erro
-//         });
-//     }
-// };
-
-// ///////////////////////////////////////////////////////////
-
-// exports.createDisciplina = async (req, res) => {
-//     const { nome } = req.body; 
-
-//     try {
-//         // Verifica se a disciplina já existe
-//         const disciplinaExistente = await Disciplina.findOne({ nome });
-
-//         if (disciplinaExistente) {
-//             return res.status(400).json({ message: 'Disciplina já existe.' });
-//         }
-        
-//         const novaDisciplina = new Disciplina({ nome });
-       
-//         const disciplinaSalva = await novaDisciplina.save();
-        
-       
-//         res.status(201).json({
-//             status: "success",
-//             message: "Disciplina criada com sucesso!",
-//             data: { disciplina: disciplinaSalva }
-//         });
-//     } catch (err) {
-//         res.status(400).json({ 
-//             status: "fail",
-//             message: err.message 
-//         });
-//     }
-// };
-
-// ///////////////////////////////////////////////////////////
-
-// // Remover uma disciplina por ID ou nome
-// exports.deleteDisciplina = async (req, res) => {
-//     const { id } = req.params;  // Pegando 'id' da rota
-//     const { nome } = req.body;  // Pegando 'nome' da query string, se existir
-
-//     try {
-//         let disciplinaDeletada;
-
-        
-//         if (id) {
-//             disciplinaDeletada = await Disciplina.findByIdAndDelete(id);
-
-//             if (!disciplinaDeletada) {
-//                 return res.status(404).json({ message: 'Disciplina não encontrada pelo ID.' });
-//             }
-
-//         } else if (nome) {
-//             disciplinaDeletada = await Disciplina.findOneAndDelete({ nome });
-
-//             if (!disciplinaDeletada) {
-//                 return res.status(404).json({ message: 'Disciplina não encontrada pelo nome.' });
-//             }
-            
-//         } else {
-//             return res.status(400).json({ message: 'Por favor, forneça um ID ou um nome para deletar.' });
-//         }
-
-//         res.status(200).json({ message: `Disciplina removida com sucesso` });
-
-//     } catch (err) {
-//         res.status(400).json({ status: "fail", message: err.message });
-//     }
-
-// };
+exports.deleteAllDisciplinas = async (req, res) => {
+  try {
+    const result = await Disciplina.deleteMany({});
+    res.status(200).json({ message: 'Todas as disciplinas foram deletadas com sucesso!', result });
+  } catch (error) {
+    console.error('Erro ao deletar disciplinas:', error);
+    res.status(500).json({ message: 'Erro ao deletar disciplinas', error: error.message || 'Erro desconhecido' });
+  }
+};

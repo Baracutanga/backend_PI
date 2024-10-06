@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Schema para notas (AV1, AV2, MU, MUPN)
 const unidadeSchema = new mongoose.Schema({
@@ -10,14 +10,15 @@ const unidadeSchema = new mongoose.Schema({
 }, { _id: false });
 
 const notasAlunoSchema = new mongoose.Schema({
-  disciplina: { type: mongoose.Schema.Types.ObjectId, ref: 'Disciplina', required: true },
-  unidade1: { type: unidadeSchema, default: () => ({}) }, // Unidade 1
-  unidade2: { type: unidadeSchema, default: () => ({}) }, // Unidade 2
-  unidade3: { type: unidadeSchema, default: () => ({}) }, // Unidade 3
+  aluno:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  disciplina: { type: mongoose.Schema.Types.ObjectId, ref: "Disciplina", required: true },
+  unidade1: { type: unidadeSchema, default: () => ({}) },
+  unidade2: { type: unidadeSchema, default: () => ({}) }, 
+  unidade3: { type: unidadeSchema, default: () => ({}) }, 
   MFA: { type: Number, default: null }, // Menção final anual
   FT: { type: Number, default: 0 }, // Total de faltas
   MFAPN: { type: Number, default: null }, // Menção final anual pós NOA
   resumo: { type: String, default: null } // Resumo final do aluno
-}, { _id: false });
+});
 
-  module.exports = mongoose.model('Conceito', notasAlunoSchema);
+  module.exports = mongoose.model("Conceito", notasAlunoSchema);

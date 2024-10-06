@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require("body-parser");
@@ -12,12 +13,12 @@ const alunoRoutes = require('./routes/alunoRoutes');
 const disciplinaRoutes = require("./routes/disciplinaRoutes");
 const avisoRoutes = require("./routes/avisoRoutes");
 const turmaRoutes = require("./routes/turmaRoutes");
-const notasAlunoRoutes = require("./routes/notasAlunoRoutes"); 
+const conceitoRoutes = require("./routes/conceitoRoutes"); 
 
 // Carregar variáveis de ambiente do arquivo .env
 dotenv.config();
 
-
+DB = "mongodb+srv://rogercauarcb:1500@users.wq3oh.mongodb.net/projetoIntegrador";
 
 mongoose.connect(DB)
 .then(() => console.log("Conectado ao Banco de Dados"))
@@ -44,13 +45,15 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 // Rotas
-app.use("/api/turmas", turmaRoutes);
+// app.use('/api/auth', authRoutes);
+
+app.use("/api/turma", turmaRoutes);
 app.use('/api/professor', professorRoutes);
 app.use('/api/aluno', alunoRoutes);
 app.use('/api/coordenador', coordenadorRoutes);
-app.use("/api/disciplinas", disciplinaRoutes);
-app.use("/api/avisos", avisoRoutes);
-app.use("/api/notas", notasAlunoRoutes);
+app.use("/api/disciplina", disciplinaRoutes);
+app.use("/api/aviso", avisoRoutes);
+app.use("/api/conceito", conceitoRoutes);
 
 // Configuração do Swagger
 // http://localhost:3000/api-docs
