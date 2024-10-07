@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const avisoController = require("../controllers/avisoController"); 
 
+//Rotas dos Avisos
 
 // Criar aviso de Professor
 router.post("/aviso", avisoController.createAviso);

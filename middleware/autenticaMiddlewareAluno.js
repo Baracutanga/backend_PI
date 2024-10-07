@@ -1,4 +1,4 @@
-const config = require('../config/jwt');
+const config = require('jsonwebtoken');
 const User = require('../models/userModel');
 //Exportando o modelo de usuário que contem as informações de cadastro:email,nome,senha.
 //Criando constante autenticaHeader que vai guardar uma requisição do header('Authorization)
