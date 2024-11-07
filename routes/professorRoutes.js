@@ -10,9 +10,10 @@ const autenticaMiddlewareProfessor = require('../middleware/autenticaMiddlewareP
 router.get('/', autenticaMiddlewareProfessor, professorController.getAllProfessores);
 
 // Criar um novo Professor
-router.post('/create', autenticaMiddlewareProfessor, professorController.createProfessor);
+router.post('/create', autenticaMiddlewareCoordenador, professorController.createProfessor);
 
 // Deletar Professor por ID
-router.delete("/delete", autenticaMiddlewareProfessor, professorController.deleteProfessor);
+router.delete("/delete", autenticaMiddlewareCoordenador, professorController.deleteProfessor);
+
 
 module.exports = router;

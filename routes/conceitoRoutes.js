@@ -6,9 +6,9 @@ const conceitoController = require("../controllers/conceitoController");
 router.get("/conceito/turmadisciplina", conceitoController.getConceitosPorTurmaEDisciplina)
 
 // Adicionar/atualizar a nota de uma unidade
-router.put("/conceito/unidade", conceitoController.updateNotaUnidade);
+router.put("/conceito/unidade", autenticaMiddlewareProfessor, conceitoController.updateNotaUnidade);
 
-
-router.put("/conceito/anual", conceitoController.updateAnual);
+// Adicionar/atualizar a nota anual
+router.put("/conceito/anual", autenticaMiddlewareProfessor, conceitoController.updateAnual);
 
 module.exports = router;
