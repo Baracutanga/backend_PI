@@ -52,6 +52,7 @@ app.use('/api/professor', professorRoutes);
 app.use('/api/aluno', alunoRoutes);
 app.use('/api/coordenador', coordenadorRoutes);
 app.use("/api/disciplina", disciplinaRoutes);
+app.use("/api/disciplina/create", disciplinaRoutes);
 app.use("/api/aviso", avisoRoutes);
 app.use("/api/conceito", conceitoRoutes);
 
