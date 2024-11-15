@@ -13,13 +13,14 @@ module.exports = async (req, res, next) => {
   // Extrair o token do cabeçalho
   const token = authHeader.split(' ')[1];
   if (!token) {
-    return res.status(401).json({ message: 'Sem token, autorização negada' });
+    return res.status(401).json({ message: 'Token erro, autorização negada' });
   }
 
   try {
     const decoded = jwt.verify(token, config.secret);
     req.user = await User.findById(decoded.id);
-    if (req.user.user ==! 'Aluno') {
+// Verificar o papel do usuário 
+    if (req.user.user !== 'Aluno') {
       return res.status(401).json({ message: 'Usuário não encontrado, autorização negada' });
     }
     next();

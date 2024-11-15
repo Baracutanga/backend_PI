@@ -1,6 +1,6 @@
-// Exportando o jsonwebtoken, as configurações de documentação e o 'User'.
+// Exportando o jsonwebtoken e o 'User'.
 //Cont: tudo isso para fazer a config de autenticação e webtoken do usuário ao cadastrar.
-const jwt = require('jsonwebtoken');
+const config = require('jsonwebtoken');
 const User = require('../models/userModel');
 //Exportando o modelo de usuário que contem as informações de cadastro:email,nome,senha.
 //Criando constante autenticaHeader que vai guardar uma requisição do header('Authorization)
@@ -20,12 +20,8 @@ module.exports = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, config.secret);
     req.user = await User.findById(decoded.id);
-    if (!req.user == 'Professor') {
+    if (req.user.user !== 'Coordenador') {
       return res.status(401).json({ message: 'Usuário não encontrado, autorização negada' });
-    }else {
-      if(req.user.user !== 'Professor') {
-        return res.status(401).json({ message: 'Acesso negado, autorização nao aprovada' });
-      }
     }
     next();
   } catch (error) {
